@@ -1,4 +1,14 @@
 Laravel 5 Modules
 ==============
 
-Official documentation is located [here](http://sky.pingpong-labs.com/docs/2.0/modules)
+## Installation
+
+### Install via composer
+
+```
+composer require nwidart/modules
+```
+
+## Credits
+
+Credits to [pingponglabs/modules](https://github.com/pingpong-labs/modules) for the original package. 
