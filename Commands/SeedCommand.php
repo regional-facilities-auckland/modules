@@ -70,6 +70,9 @@ class SeedCommand extends Command
         if ($option = $this->option('database')) {
             $params['--database'] = $option;
         }
+        if ($this->option('force')) {
+            $params['--force'] = true;
+        }
 
         $this->call('db:seed', $params);
     }
@@ -109,9 +112,10 @@ class SeedCommand extends Command
      */
     protected function getOptions()
     {
-        return array(
-            array('class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', null),
-            array('database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed.'),
-        );
+        return [
+            ['class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', null],
+            ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed.'],
+            ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
+        ];
     }
 }
