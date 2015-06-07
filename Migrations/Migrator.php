@@ -79,7 +79,7 @@ class Migrator
      */
     public function rollback()
     {
-        $migrations = $this->getLast($this->getMigrations());
+        $migrations = $this->getLast(array_reverse($this->getMigrations()));
 
         $this->requireFiles($migrations);
 
@@ -107,7 +107,7 @@ class Migrator
      */
     public function reset()
     {
-        $migrations = $this->getMigrations();
+        $migrations = array_reverse($this->getMigrations());
 
         $this->requireFiles($migrations);
 
