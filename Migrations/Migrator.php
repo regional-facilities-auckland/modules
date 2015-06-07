@@ -2,6 +2,8 @@
 
 namespace Pingpong\Modules\Migrations;
 
+use Pingpong\Modules\Module;
+
 class Migrator
 {
     /**
@@ -23,7 +25,7 @@ class Migrator
      *
      * @param \Pingpong\Modules\Module $module
      */
-    public function __construct($module)
+    public function __construct(Module $module)
     {
         $this->module = $module;
         $this->laravel = $module->getLaravel();
@@ -68,35 +70,6 @@ class Migrator
         sort($files);
 
         return $files;
-    }
-
-    /**
-     * Migrate migrations.
-     *
-     * @return array
-     */
-    public function migrate()
-    {
-        $migrations = $this->getMigrations();
-
-        $this->requireFiles($migrations);
-
-        // Once we grab all of the migration files for the path, we will compare them
-        // against the migrations that have already been run for this package then
-        // run each of the outstanding migrations against a database connection.
-        $migrations = array_diff($migrations, $this->getRan());
-
-        $migrated = [];
-
-        foreach ($migrations as $migration) {
-            $migrated[] = $migration;
-
-            $this->up($migration);
-
-            $this->log($migration);
-        }
-
-        return $migrated;
     }
 
     /**
@@ -255,11 +228,14 @@ class Migrator
     /**
      * Get the last migration batch number.
      *
+     * @param array $migrations
      * @return int
      */
-    public function getLastBatchNumber()
+    public function getLastBatchNumber($migrations)
     {
-        return $this->table()->max('batch');
+        return $this->table()
+            ->whereIn('migration', $migrations)
+            ->max('batch');
     }
 
     /**
@@ -272,7 +248,7 @@ class Migrator
     public function getLast($migrations)
     {
         $query = $this->table()
-            ->where('batch', $this->getLastBatchNumber())
+            ->where('batch', $this->getLastBatchNumber($migrations))
             ->whereIn('migration', $migrations)
             ;
 
