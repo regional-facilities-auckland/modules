@@ -143,6 +143,8 @@ class Module extends ServiceProvider
      */
     public function boot()
     {
+        $this->registerFiles();
+
         $this->registerTranslation();
 
         $this->fireEvent('boot');
@@ -158,7 +160,7 @@ class Module extends ServiceProvider
         $lowerName = $this->getLowerName();
 
         $langPath = base_path("resources/lang/{$lowerName}");
-        
+
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, $lowerName);
         }
@@ -195,8 +197,6 @@ class Module extends ServiceProvider
         $this->registerAliases();
 
         $this->registerProviders();
-
-        $this->registerFiles();
 
         $this->fireEvent('register');
     }
