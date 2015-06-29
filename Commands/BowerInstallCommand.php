@@ -39,7 +39,7 @@ class BowerInstallCommand extends Command
     public function fire()
     {
         // Check bower is installed
-        $this->checkBowerAvailability();
+        if (!$this->isBowerInstalled()) return;
 
         foreach($this->modules->all() as $module) {
             $module = $this->modules->findOrFail($module);
@@ -73,9 +73,9 @@ class BowerInstallCommand extends Command
     }
 
     /**
-     * @return void
+     * @return boolean
      */
-    protected function checkBowerAvailability()
+    protected function isBowerInstalled()
     {
         $result = null;
         $output = [];
@@ -83,8 +83,12 @@ class BowerInstallCommand extends Command
 
         if ($result === 127) {
             $this->error('Bower is not installed, or could not be found.');
+            return false;
         } elseif ($result !== 0) {
             $this->error('An error occurred while checking Bower installation: ' . implode(PHP_EOL, $output));
+            return false;
         }
+
+        return true;
     }
 }
