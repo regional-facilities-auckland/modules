@@ -52,6 +52,7 @@ class ConsoleServiceProvider extends ServiceProvider
         'Use',
         'Dump',
         'MakeRequest',
+        'BowerInstall',
     ];
 
     /**
