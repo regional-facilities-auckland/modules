@@ -9,6 +9,9 @@ use Pingpong\Modules\Repository;
 class BowerInstallCommand extends Command
 {
 
+    const EXIT_COMMAND_NOT_FOUND = 127;
+    const EXIT_SUCCESS = 0;
+
     /**
      * @var string
      */
@@ -38,7 +41,6 @@ class BowerInstallCommand extends Command
 
     public function fire()
     {
-        // Check bower is installed
         if (!$this->isBowerInstalled()) return;
 
         foreach($this->modules->all() as $module) {
@@ -51,23 +53,17 @@ class BowerInstallCommand extends Command
 
     protected function handleModuleBowerInstall(Module $module)
     {
-        // Check if bower.json exists
         $path = $module->getPath();
-        if (!file_exists($path . '/bower.json')) return;
-
-        // Run bower install
-        $command = "cd {$path} && bower install";
-
-        if ($this->option('production')) {
-            $command .= ' --production';
+        if (!$this->bowerFileExists($path)) {
+            return $this->info("Skipping bower install for module '{$module->getName()}': bower.json file not found. ");
         }
 
         $this->info("Installing bower components for module '{$module->getName()}'");
 
         $result = null;
-        passthru($command, $result);
+        passthru($this->getExecCommand($path), $result);
 
-        if ($result !== 0) {
+        if ($result !== self::EXIT_SUCCESS) {
             $this->error('Bower install ended with error!');
         }
     }
@@ -81,14 +77,38 @@ class BowerInstallCommand extends Command
         $output = [];
         exec('bower', $output, $result);
 
-        if ($result === 127) {
+        if ($result === self::EXIT_COMMAND_NOT_FOUND) {
             $this->error('Bower is not installed, or could not be found.');
             return false;
-        } elseif ($result !== 0) {
+        } elseif ($result !== self::EXIT_SUCCESS) {
             $this->error('An error occurred while checking Bower installation: ' . implode(PHP_EOL, $output));
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * @param $path
+     * @return string
+     */
+    protected function getExecCommand($path)
+    {
+        $command = "cd {$path} && bower install";
+
+        if ($this->option('production')) {
+            $command .= ' --production';
+        }
+
+        return $command;
+    }
+
+    /**
+     * @param $path
+     * @return bool
+     */
+    protected function bowerFileExists($path)
+    {
+        return file_exists($path . '/bower.json');
     }
 }
