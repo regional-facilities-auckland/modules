@@ -35,20 +35,31 @@ class SeedCommand extends Command
     {
         $this->module = $this->laravel['modules'];
 
-        $module = Str::studly($this->argument('module')) ?: $this->getModuleName();
-
-        if ($module) {
-            if ($this->module->has($module)) {
-                $this->dbseed($module);
-
-                return $this->info("Module [$module] seeded.");
+        if ($this->argument('module')) {
+            $modules = $this->argument('module');
+        }
+        elseif ($this->option('all')) {
+            $modules = $this->module->all();
+        }
+        else {
+            try {
+                $modules = $this->getModuleName();
+            } catch (\Exception $e) {
+                return $this->info("Use module:use to select which module you want to seed.");
             }
-
-            return $this->error("Module [$module] does not exists.");
         }
 
-        foreach ($this->module->all() as $name) {
+        foreach ((array) $modules as $module) {
+            $name = $module instanceof Module ? Str::studly($module->getName()) : Str::studly($module);
+
+            if (! $this->module->has($name)) {
+                $this->error("Module [$module] does not exists.");
+                continue;
+            }
+
             $this->dbseed($name);
+
+            $this->info("Module [$module] seeded.");
         }
 
         return $this->info('All modules seeded.');
@@ -115,6 +126,7 @@ class SeedCommand extends Command
         return [
             ['class', null, InputOption::VALUE_OPTIONAL, 'The class name of the root seeder', null],
             ['database', null, InputOption::VALUE_OPTIONAL, 'The database connection to seed.'],
+            ['all', null, InputOption::VALUE_NONE, 'Whether or not we should seed all modules.'],
             ['force', null, InputOption::VALUE_NONE, 'Force the operation to run when in production.'],
         ];
     }
