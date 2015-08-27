@@ -39,6 +39,13 @@ class Repository implements RepositoryInterface, Countable
     protected $stubPath;
 
     /**
+     * The loaded modules
+     * 
+     * @var array
+     */
+    protected $modules = [];
+
+    /**
      * The constructor.
      *
      * @param Application $app
@@ -121,11 +128,11 @@ class Repository implements RepositoryInterface, Countable
             is_array($manifests) || $manifests = [];
 
             foreach ($manifests as $manifest) {
-                $name = Json::make($manifest)->get('name');
-
+                $json = Json::make($manifest);
+                $name = $json->get('name');
                 $lowerName = strtolower($name);
 
-                $modules[$name] = new Module($this->app, $lowerName, dirname($manifest));
+                $modules[$name] = new Module($this->app, $lowerName, dirname($manifest), $json);
             }
         }
 
@@ -139,11 +146,11 @@ class Repository implements RepositoryInterface, Countable
      */
     public function all()
     {
-        if (!$this->config('cache.enabled')) {
-            return $this->scan();
+        if (!$this->modules) {
+            $this->modules = $this->config('cache.enabled') ? $this->formatCached($this->getCached()) : $this->scan();
         }
 
-        return $this->formatCached($this->getCached());
+        return $this->modules;
     }
 
     /**
