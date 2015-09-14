@@ -121,11 +121,12 @@ class Repository implements RepositoryInterface, Countable
             is_array($manifests) || $manifests = [];
 
             foreach ($manifests as $manifest) {
-                $name = Json::make($manifest)->get('name');
+                $json = Json::make($manifest);
+                $name = $json->get('name');
 
                 $lowerName = strtolower($name);
 
-                $modules[$name] = new Module($this->app, $lowerName, dirname($manifest));
+            $modules[$name] = new Module($this->app, $lowerName, dirname($manifest), $json);
             }
         }
 

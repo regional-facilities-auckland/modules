@@ -24,11 +24,18 @@ class Module extends ServiceProvider
     protected $name;
 
     /**
-     * The module path,.
+     * The module path.
      *
      * @var string
      */
     protected $path;
+
+    /**
+     * JSON Instance.
+     * 
+     * @var Json
+     */
+    protected $json;
 
     /**
      * The constructor.
@@ -37,11 +44,12 @@ class Module extends ServiceProvider
      * @param $name
      * @param $path
      */
-    public function __construct(Application $app, $name, $path)
+    public function __construct(Application $app, $name, $path, Json $json)
     {
         $this->app = $app;
         $this->name = $name;
         $this->path = realpath($path);
+        $this->json = $json;
     }
 
     /**
@@ -173,7 +181,11 @@ class Module extends ServiceProvider
      */
     public function json()
     {
-        return new Json($this->getPath().'/module.json', $this->app['files']);
+        if (!$this->json) {
+            $this->json = Json($this->getPath().'/module.json', $this->app['files']);
+        }
+
+        return $this->json;
     }
 
     /**
