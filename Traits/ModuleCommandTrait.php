@@ -11,6 +11,8 @@ trait ModuleCommandTrait
      */
     public function getModuleName()
     {
+        $this->laravel['modules']->rescan();
+
         $module = $this->argument('module') ?: $this->laravel['modules']->getUsedNow();
 
         $module = $this->laravel['modules']->findOrFail($module);
